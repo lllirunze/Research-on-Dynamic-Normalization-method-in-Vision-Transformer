@@ -3,12 +3,15 @@ import shutil
 
 from torch import nn
 
-from model import vit_base_patch16_224_cifar10
+from model import (vit_base_patch16_224_cifar10,
+                   vit_base_patch7_28_mnist)
 
 def create_model(args):
 
     if args.model == 'vit_base_patch16_224_cifar10':
-        model = vit_base_patch16_224_cifar10(args.num_classes, has_logits=True)
+        model = vit_base_patch16_224_cifar10(args.num_classes, args.in_channels, has_logits=True)
+    elif args.model == 'vit_base_patch7_28_mnist':
+        model = vit_base_patch7_28_mnist(args.num_classes, args.in_channels, has_logits=True)
     else:
         raise Exception("Error: Can't find any model name called {}.".format(args.model))
 

@@ -5,6 +5,7 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms, datasets
 
+"""
 data_transform = {
     "train": transforms.Compose([transforms.RandomResizedCrop(224),
                                  transforms.RandomHorizontalFlip(),
@@ -56,17 +57,36 @@ class pathLoader(Dataset):
 
     def __len__(self):
         return len(self.image_label_path)
+        
+"""
 
 def getDataLoader(data_dir, batch_size, num_workers, train_or_test=False):
 
     # dataset = datasets.ImageFolder(root=data_dir, transform=data_transform["train" if train_or_test else "test"])
-    dataset = datasets.CIFAR10(root=data_dir,
-                               train=train_or_test,
-                               transform=data_transform["train" if train_or_test else "test"],
-                               download=True)
-    dataloader = DataLoader(dataset,
-                            batch_size=batch_size,
-                            shuffle=train_or_test,
-                            num_workers=num_workers)
+    if data_dir == "./data/CIFAR10":
+        dataset = datasets.CIFAR10(root=data_dir,
+                                   train=train_or_test,
+                                   transform=transforms.Compose([transforms.RandomResizedCrop(224),
+                                                                 transforms.RandomHorizontalFlip(),
+                                                                 transforms.ToTensor(),
+                                                                 transforms.Normalize([0.5, 0.5, 0.5],
+                                                                                      [0.5, 0.5, 0.5])]),
+                                   download=True)
+        dataloader = DataLoader(dataset,
+                                batch_size=batch_size,
+                                shuffle=train_or_test,
+                                num_workers=num_workers)
+    elif data_dir == "./data/MNIST":
+        dataset = datasets.MNIST(root=data_dir,
+                                 train=train_or_test,
+                                 transform=transforms.Compose([transforms.ToTensor(),
+                                                               transforms.Normalize((0.1307,), (0.3081,))]),
+                                 download=True)
+        dataloader = DataLoader(dataset,
+                                batch_size=batch_size,
+                                shuffle=train_or_test,
+                                num_workers=num_workers)
+    else:
+        raise Exception("Error: Can't find data directory name called {}.".format(data_dir))
 
     return dataloader, dataset

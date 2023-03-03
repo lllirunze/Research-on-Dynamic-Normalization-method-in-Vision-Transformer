@@ -277,7 +277,6 @@ class VisionTransformer(nn.Module):
     "An image is worth 16x16 words: Transformers for image recognition at scale"
     """
 
-    # TODO: Vision Transformer
     def __init__(self,
                  image_size=224,
                  patch_size=16,
@@ -387,14 +386,28 @@ class VisionTransformer(nn.Module):
 
         return x
 
-def vit_base_patch16_224_cifar10(num_classes: int=10, has_logits: bool=True):
+def vit_base_patch16_224_cifar10(num_classes: int=10, in_channels: int=3, has_logits: bool=True):
 
     model = VisionTransformer(image_size=224,
                               patch_size=16,
+                              in_channels=in_channels,
                               num_classes=num_classes,
                               embed_dim=768,
                               representation_size=768 if has_logits else None,
                               layers=12,
                               num_heads=12)
+
+    return model
+
+def vit_base_patch7_28_mnist(num_classes: int=10, in_channels: int=1, has_logits: bool=True):
+
+    model = VisionTransformer(image_size=28,
+                              patch_size=7,
+                              in_channels=in_channels,
+                              num_classes=num_classes,
+                              embed_dim=64,
+                              representation_size=64 if has_logits else None,
+                              layers=6,
+                              num_heads=8)
 
     return model
