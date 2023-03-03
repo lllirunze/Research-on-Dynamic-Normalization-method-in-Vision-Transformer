@@ -10,20 +10,22 @@ data_transform = {
                                  transforms.RandomHorizontalFlip(),
                                  transforms.ToTensor(),
                                  transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])]),
-    # TODO: test 部分暂时没写
-    "test": transforms.Compose()
+    "test": transforms.Compose([transforms.RandomResizedCrop(224),
+                                transforms.RandomHorizontalFlip(),
+                                transforms.ToTensor(),
+                                transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])])
 }
 
 class imageLoader(Dataset):
 
-    def __init__(self, image_label, arg=False):
+    def __init__(self, image_label, train_or_test=False):
         self.image_label = image_label
-        self.arg = arg
+        self.train_or_test = train_or_test
 
     def __getitem__(self, item):
         image, label = self.image_label[item]
 
-        if self.arg:
+        if self.train_or_test:
             image = data_transform["train"](image)
         else:
             image = data_transform["test"](image)
@@ -55,13 +57,16 @@ class pathLoader(Dataset):
     def __len__(self):
         return len(self.image_label_path)
 
-def getDataLoader(data_dir, batch_size, num_workers, arg=False):
+def getDataLoader(data_dir, batch_size, num_workers, train_or_test=False):
 
-    dataset = datasets.ImageFolder(root=data_dir,
-                                   transform=data_transform["train" if arg else "test"])
+    # dataset = datasets.ImageFolder(root=data_dir, transform=data_transform["train" if train_or_test else "test"])
+    dataset = datasets.CIFAR10(root=data_dir,
+                               train=train_or_test,
+                               transform=data_transform["train" if train_or_test else "test"],
+                               download=True)
     dataloader = DataLoader(dataset,
                             batch_size=batch_size,
-                            shuffle=arg,
+                            shuffle=train_or_test,
                             num_workers=num_workers)
 
     return dataloader, dataset
