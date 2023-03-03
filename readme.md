@@ -1,14 +1,32 @@
 ## Research on Dynamic Normalization method in Vision Transformer
 
-## Abstract
+### Abstract
 
 The dynamic feature normalization method of Transformer model is studied from the aspect of model regularization. It is proposed to use feature normalization instead of traditional layer normalization to achieve explicit Token value normalization and accelerate model convergence. Combined with the idea of parameter reorganization, a dynamic learnable feature normalization is proposed to improve the flexibility and computational efficiency of feature normalization.
 
-## Key Words
+### Keywords
 
 - Transformer
 - Feature Normalization
 - Parameter Reorganization
+
+### Requirements
+
+```commandline
+pip install -r requirements.txt
+```
+
+### Progress
+
+ViT has reappeared at this stage, but the code can not run because the memory of GPU is too small.
+
+The error content is as follows.
+
+```commandline
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 58.00 MiB (GPU 0; 4.00 GiB total capacity; 3.34 GiB already allocated; 0 bytes free; 3.41 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+```
+
+As a result, I need to ask Prof. Wang for help.
 
 ### Reference
 
