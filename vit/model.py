@@ -78,8 +78,8 @@ class MultiHeadAttention(nn.Module):
         """
         super().__init__()
         self.num_heads = num_heads
-        # dim_head = dim // num_heads
-        self.scale = qk_scale or ((dim // num_heads) ** (-0.5))
+        dim_head = dim // num_heads
+        self.scale = qk_scale or (dim_head ** (-0.5))
         self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
         self.attn_drop = nn.Dropout(attn_drop_ratio)
         self.linear = nn.Linear(dim, dim)
@@ -140,7 +140,9 @@ class MultiLayerPerceptron(nn.Module):
         hidden_channels = hidden_channels or in_channels
         out_channels = out_channels or in_channels
         self.fc1 = nn.Linear(in_features=in_channels, out_features=hidden_channels)
-        self.act = act_layer
+        # TODO: self.act 报错：NoneType object is not callable，暂时没找到解决方法，故直接用 nn.GELU()
+        # self.act = act_layer()
+        self.act = nn.GELU()
         self.dropout1 = nn.Dropout(drop_ratio)
         self.fc2 = nn.Linear(in_features=hidden_channels, out_features=out_channels)
         self.dropout2 = nn.Dropout(drop_ratio)
@@ -234,13 +236,13 @@ class MLPClassificationHead(nn.Module):
     """
     MLP Head
     This consists of Pre-Logits and Linear layer.
-    Pre-Logits consists of Linear layer and Tanh function if we train ImageNet21K, else just Identity.
+    Pre-Logits consists of Linear layer and Tanh function.
     """
 
     def __init__(self,
                  embed_dim,
                  num_classes,
-                 representation_size=None,):
+                 representation_size=None):
         """
         MLP classification head
         :param embed_dim: embedding dimension = patch_size * patch_size * in_channels
@@ -385,3 +387,14 @@ class VisionTransformer(nn.Module):
 
         return x
 
+def vit_base_patch16_224_cifar10(num_classes: int=10, has_logits: bool=True):
+
+    model = VisionTransformer(image_size=224,
+                              patch_size=16,
+                              num_classes=num_classes,
+                              embed_dim=768,
+                              representation_size=768 if has_logits else None,
+                              layers=12,
+                              num_heads=12)
+
+    return model
