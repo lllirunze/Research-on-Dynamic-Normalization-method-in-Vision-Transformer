@@ -18,6 +18,8 @@ pip install -r requirements.txt
 
 ### Progress
 
+#### March 2, 2023
+
 ViT has reappeared at this stage, but the code can not run because the memory of GPU is too small.
 
 The error content is as follows.
@@ -26,7 +28,19 @@ The error content is as follows.
 torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 58.00 MiB (GPU 0; 4.00 GiB total capacity; 3.34 GiB already allocated; 0 bytes free; 3.41 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
 ```
 
-As a result, I need to ask Prof. Wang for help.
+#### March 5, 2023
+
+'CUDA out of memory' has been solved by reducing batch size from 16 to 4, but there is another serious problem.
+
+The error content is as follows.
+
+```commandline
+RuntimeError: Unable to find a valid cuDNN algorithm to run convolution
+```
+
+According to CSDN, it is because cudNN and CUDA version does not match.
+
+I need to change cudNN or CUDA version so that I can run these code.
 
 ### Reference
 
