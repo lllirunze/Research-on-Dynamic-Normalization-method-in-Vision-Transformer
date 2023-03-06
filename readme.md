@@ -42,6 +42,24 @@ According to CSDN, it is because cudNN and CUDA version does not match.
 
 I need to change cudNN or CUDA version so that I can run these code.
 
+#### March 6, 2023
+
+There is a ridiculous bug: number of classes = 5.
+
+Actually, the number of classes of CIFAR-10 is 10.
+
+After debugging, I can run ViT, and the result is as follows.
+
+```commandline
+epoch 0: 100%|██████████| 12500/12500 [1:48:44<00:00,  1.92it/s, loss=2.3856]
+=> train_loss: 1.9306, train_accuracy: 0.2730, test_loss: 1.7810, test_accuracy: 0.3433
+```
+
+The GPU of my computer(ThinkPad X1 Extreme) is RTX 1650-Ti, so the speed of code running is extremely slow.
+Specifically, each epoch needs to run for about one hour.
+
+I need to find one or more better GPU in order to produce results faster than before.
+
 ### Reference
 
 - [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)

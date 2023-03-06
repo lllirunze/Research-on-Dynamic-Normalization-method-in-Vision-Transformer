@@ -3,8 +3,8 @@ import shutil
 
 from torch import nn
 
-from model import (vit_base_patch16_224_cifar10,
-                   vit_base_patch7_28_mnist)
+from model_base import (vit_base_patch16_224_cifar10,
+                        vit_base_patch7_28_mnist)
 
 def create_model(args):
 
