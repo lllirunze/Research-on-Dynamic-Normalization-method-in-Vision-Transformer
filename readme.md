@@ -64,27 +64,39 @@ I need to find one or more better GPU in order to produce results faster than be
 
 ##### About Layer Normalization:
 
-When input $X \in \mathbb{R}^{B \times C}$ is a batch of embeddings,
-    where $B$ is the batch size and $C$ is the number of features.
-    $\gamma \in \mathbb{R}^{C}$ and $\beta \in \mathbb{R}^{C}$.
-    $$\text{LN}(X) = \gamma
-    \frac{X - \underset{C}{\mathbb{E}}[X]}{\sqrt{\underset{C}{Var}[X] + \epsilon}}
-    + \beta$$
+When input $X \in \mathbb{R}^{B \times C}$ is a batch of embeddings, where $B$ is the batch size and $C$ is the number of features.
 
-When input $X \in \mathbb{R}^{L \times B \times C}$ is a batch of a sequence of embeddings (which is applied in **ViT**),
-    where $B$ is the batch size, $C$ is the number of channels, $L$ is the length of the sequence.
-    $\gamma \in \mathbb{R}^{C}$ and $\beta \in \mathbb{R}^{C}$.
-    $$\text{LN}(X) = \gamma
-    \frac{X - \underset{C}{\mathbb{E}}[X]}{\sqrt{\underset{C}{Var}[X] + \epsilon}}
-    + \beta$$
+$\gamma \in \mathbb{R}^{C}$ and $\beta \in \mathbb{R}^{C}$.
 
-When input $X \in \mathbb{R}^{B \times C \times H \times W}$ is a batch of image representations,
-    where $B$ is the batch size, $C$ is the number of channels, $H$ is the height and $W$ is the width.
-    This is not a widely used scenario.
-    $\gamma \in \mathbb{R}^{C \times H \times W}$ and $\beta \in \mathbb{R}^{C \times H \times W}$.
-    $$\text{LN}(X) = \gamma
-    \frac{X - \underset{C, H, W}{\mathbb{E}}[X]}{\sqrt{\underset{C, H, W}{Var}[X] + \epsilon}}
-    + \beta$$
+$$\text{LN}(X) = \gamma \frac{X - \underset{C}{\mathbb{E}}[X]}{\sqrt{\underset{C}{Var}[X] + \epsilon}} + \beta$$
+
+When input $X \in \mathbb{R}^{L \times B \times C}$ is a batch of a sequence of embeddings (which is applied in **ViT**), where $B$ is the batch size, $C$ is the number of channels, $L$ is the length of the sequence.
+    
+$\gamma \in \mathbb{R}^{C}$ and $\beta \in \mathbb{R}^{C}$.
+    
+$$\text{LN}(X) = \gamma \frac{X - \underset{C}{\mathbb{E}}[X]}{\sqrt{\underset{C}{Var}[X] + \epsilon}} + \beta$$
+
+When input $X \in \mathbb{R}^{B \times C \times H \times W}$ is a batch of image representations, where $B$ is the batch size, $C$ is the number of channels, $H$ is the height and $W$ is the width.
+
+This is not a widely used scenario.
+
+$\gamma \in \mathbb{R}^{C \times H \times W}$ and $\beta \in \mathbb{R}^{C \times H \times W}$.
+    
+$$\text{LN}(X) = \gamma \frac{X - \underset{C, H, W}{\mathbb{E}}[X]}{\sqrt{\underset{C, H, W}{Var}[X] + \epsilon}} + \beta$$
+
+##### About Feature Normalization:
+
+In the algorithm based on gradient descent, the feature normalization method is used to unify the dimension of the feature, which can improve the model convergence speed and the final model accuracy.
+
+###### Min-Max Scaling
+
+$$X_{norm} = \frac{X - X_{min}}{X_{max} - X_{min}}$$
+
+###### Z-Score Scaling
+
+$$X_{norm} = \frac{X - \mu}{\sigma}$$
+
+where $\mu = \frac{1}{N} \sum_{i=1}^{N} X_{i}$ , $\sigma = \sqrt{\frac{1}{N-1} \sum_{i=1}^{N}(X_{i}- \mu)^{2}}$ .
 
 
 ### Reference
