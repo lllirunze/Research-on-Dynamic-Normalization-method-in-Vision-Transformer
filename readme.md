@@ -60,6 +60,33 @@ Specifically, each epoch needs to run for about one hour.
 
 I need to find one or more better GPU in order to produce results faster than before.
 
+#### March 8, 2023
+
+##### About Layer Normalization:
+
+When input $X \in \mathbb{R}^{B \times C}$ is a batch of embeddings,
+    where $B$ is the batch size and $C$ is the number of features.
+    $\gamma \in \mathbb{R}^{C}$ and $\beta \in \mathbb{R}^{C}$.
+    $$\text{LN}(X) = \gamma
+    \frac{X - \underset{C}{\mathbb{E}}[X]}{\sqrt{\underset{C}{Var}[X] + \epsilon}}
+    + \beta$$
+
+When input $X \in \mathbb{R}^{L \times B \times C}$ is a batch of a sequence of embeddings (which is applied in **ViT**),
+    where $B$ is the batch size, $C$ is the number of channels, $L$ is the length of the sequence.
+    $\gamma \in \mathbb{R}^{C}$ and $\beta \in \mathbb{R}^{C}$.
+    $$\text{LN}(X) = \gamma
+    \frac{X - \underset{C}{\mathbb{E}}[X]}{\sqrt{\underset{C}{Var}[X] + \epsilon}}
+    + \beta$$
+
+When input $X \in \mathbb{R}^{B \times C \times H \times W}$ is a batch of image representations,
+    where $B$ is the batch size, $C$ is the number of channels, $H$ is the height and $W$ is the width.
+    This is not a widely used scenario.
+    $\gamma \in \mathbb{R}^{C \times H \times W}$ and $\beta \in \mathbb{R}^{C \times H \times W}$.
+    $$\text{LN}(X) = \gamma
+    \frac{X - \underset{C, H, W}{\mathbb{E}}[X]}{\sqrt{\underset{C, H, W}{Var}[X] + \epsilon}}
+    + \beta$$
+
+
 ### Reference
 
 - [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)

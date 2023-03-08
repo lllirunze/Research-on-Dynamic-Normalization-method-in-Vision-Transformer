@@ -54,7 +54,7 @@ def main(args):
 
     # Define optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = optim.SGD(params, lr=args.lr, momentum=0.9, weight_decay=5e-5)
+    optimizer = optim.SGD(params, lr=args.lr, momentum=0.9, weight_decay=0.3)
     lf = lambda x: ((1 + math.cos(x * math.pi / args.epochs)) / 2) * (1 - args.lrf) + args.lrf
     scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lf)
 

@@ -4,10 +4,9 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--num_classes', type=int, default=10)
-parser.add_argument('--epochs', type=int, default=3)
-# parser.add_argument('--batch_size', type=int, default=32)
+parser.add_argument('--epochs', type=int, default=1)
 parser.add_argument('--batch_size', type=int, default=4)
-parser.add_argument('--lr', type=float, default=0.001)
+parser.add_argument('--lr', type=float, default=0.003)
 parser.add_argument('--lrf', type=float, default=0.01)
 parser.add_argument('--in_channels', type=int, default=3)
 

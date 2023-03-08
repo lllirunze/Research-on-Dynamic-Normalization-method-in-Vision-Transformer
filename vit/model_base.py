@@ -64,7 +64,7 @@ class MultiHeadAttention(nn.Module):
                  num_heads=8,
                  qkv_bias=False,
                  qk_scale=None,
-                 attn_drop_ratio=0.,
+                 attn_drop_ratio=0.1,
                  # linear_drop_ratio=0.
                  ):
         """
@@ -127,7 +127,7 @@ class MultiLayerPerceptron(nn.Module):
                  hidden_channels=None,
                  out_channels=None,
                  act_layer=nn.GELU,
-                 drop_ratio=0.):
+                 drop_ratio=0.1):
         """
         MLP consists of three layers from in_channels, hidden_channels to out_channels
         :param in_channels: number of input channels
@@ -172,8 +172,8 @@ class TransformerEncoder(nn.Module):
                  mlp_ratio=4.,
                  qkv_bias=False,
                  qk_scale=None,
-                 drop_ratio=0.,
-                 attn_drop_ratio=0.,
+                 drop_ratio=0.1,
+                 attn_drop_ratio=0.1,
                  # drop_path_ratio=0.,
                  act_layer=nn.GELU,
                  norm_layer=nn.LayerNorm):
@@ -289,8 +289,8 @@ class VisionTransformer(nn.Module):
                  mlp_ratio=4.0,
                  qkv_bias=True,
                  qk_scale=None,
-                 drop_ratio=0.,
-                 attn_drop_ratio=0.,
+                 drop_ratio=0.1,
+                 attn_drop_ratio=0.1,
                  embed_layer=PatchEmbed,
                  act_layer=None,
                  norm_layer=nn.LayerNorm):
