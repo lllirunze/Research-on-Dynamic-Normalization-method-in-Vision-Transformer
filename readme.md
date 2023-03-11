@@ -98,6 +98,11 @@ $$X_{norm} = \frac{X - \mu}{\sigma}$$
 
 where $\mu = \frac{1}{N} \sum_{i=1}^{N} X_{i}$ , $\sigma = \sqrt{\frac{1}{N-1} \sum_{i=1}^{N}(X_{i}- \mu)^{2}}$ .
 
+#### March 11, 2023
+
+Finish Min-Max Scaling of Pytorch in Jupyter Notebook.
+
+The Min-Max Scaling test has not been carried out yet
 
 ### Reference
 
