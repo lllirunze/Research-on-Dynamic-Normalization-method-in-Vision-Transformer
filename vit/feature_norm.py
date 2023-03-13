@@ -7,3 +7,12 @@ def MinMaxScaling(feature: torch.Tensor, eps=1.0):
     # norm = (X - minX) / (maxX - minX)
     feature = (feature - f_min) / (f_max - f_min + eps)
     return feature
+
+def ZScoreScaling(feature: torch.Tensor, eps=1.0):
+    # Calculate the average value and variance of the last dimension
+    var_mean = torch.var_mean(feature, dim=-1, unbiased=False)
+    mean = var_mean[1]
+    var = var_mean[0]
+    # norm = (X - meanX) / (varX)
+    feature = (feature - mean[..., None]) / torch.sqrt(var[..., None] + eps)
+    return feature

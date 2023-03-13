@@ -100,9 +100,11 @@ where $\mu = \frac{1}{N} \sum_{i=1}^{N} X_{i}$ , $\sigma = \sqrt{\frac{1}{N-1} \
 
 #### March 11, 2023
 
-Finish Min-Max Scaling of Pytorch in Jupyter Notebook.
+Finish Min-Max Scaling of Pytorch, whose test has not been carried out yet.
 
-The Min-Max Scaling test has not been carried out yet
+#### March 12, 2023
+
+Finish Z-Score Scaling of Pytorch, whose test hasn't been carried out yet.
 
 ### Reference
 
