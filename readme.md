@@ -115,7 +115,7 @@ $$ Z_{t} = \frac{X_{t}- \hat{\mu_{t}}}{\sqrt{\hat{\sigma_{t}}^{2} + \epsilon}} $
 
 $$ Y_{t} = \gamma \cdot Z_{t} + \beta $$
 
-Let $ Z_{t} $ denote the normalized alternative to input $ X_{t} $ at iteration $ t $. The training statistics for normalizing are marked as $ \hat{\mu_{t}} $ and $ \hat{\sigma_{t}}^{2} $, given by
+Let $Z_{t}$ denote the normalized alternative to input $X_{t}$ at iteration $t$. The training statistics for normalizing are marked as $\hat{\mu_{t}}$ and $\hat{\sigma_{t}}^{2}$, given by
 
 $$ \hat{\mu_{t}} = \Theta_{\mu}(\mu_{t}, \cdots, \mu_{t-M+1}) $$
 
@@ -123,13 +123,13 @@ $$ \hat{\sigma_{t}}^{2} = \Theta_{\sigma^{2}}(\sigma_{t}^{2}, \cdots, \sigma_{t-
 
 ###### Backward Propagation:
 
-The gradients of loss $ L $ pass as:
+The gradients of loss $L$ pass as:
 
 $$ \frac{\partial L}{\partial Z_{t}} = \gamma \cdot \frac{\partial L}{\partial Y_{t}} $$
 
 $$ \frac{\partial L}{\partial X_{t}} = \frac{1}{\sqrt{\hat{\sigma_{t}}^{2} + \epsilon}} (\frac{\partial L}{\partial Z_{t}} - \psi_{\hat{\mu_{t}}} - Z_{t} \cdot \psi_{\hat{\sigma_t}^{2}}) $$
 
-Giving gradients $ \frac{\partial L}{\partial Y_{t}} $, $ \psi_{\hat{\mu_{t}}} $ and $ \psi_{\hat{\sigma_t}^{2}} $ indicate the gradient statistics that used for estimating $ \frac{\partial L}{\partial X_{t}} $. In this framework, estimated gradients are gained from averaging functions $ \Theta_{g_{\mu}} $ and $ \Theta_{g_{\sigma^{2}}} $,
+Giving gradients $\frac{\partial L}{\partial Y_{t}}$, $\psi_{\hat{\mu_{t}}}$ and $\psi_{\hat{\sigma_t}^{2}}$ indicate the gradient statistics that used for estimating $\frac{\partial L}{\partial X_{t}}$. In this framework, estimated gradients are gained from averaging functions $\Theta_{g_{\mu}}$ and $\Theta_{g_{\sigma^{2}}}$,
 
 $$ \psi_{\hat{\mu_{t}}} = \Theta_{g_{\mu}}(g_{\hat{\mu_{t}}}, \cdots, g_{\hat{\mu}_{t-M+1}}) $$
 
@@ -139,7 +139,7 @@ The gradients passed from $\hat{\mu_{t}}$ and $\hat{\sigma_{t}}^{2}$ are denoted
 
 ##### 2 Fluctuation Smoothing
 
-We turn ot adopt geometric mean(GM) with less sensitivity to outliers instead of arithmetic mean(AM) to gain a better representation of activation statistics in a skewed distribution. 
+We turn ot adopt geometric mean(GM) with less sensitivity to outliers instead of arithmetic mean(AM) to gain a better representation of activation statistics in a skewed distribution.
 
 The averaging functions are defined as:
 
