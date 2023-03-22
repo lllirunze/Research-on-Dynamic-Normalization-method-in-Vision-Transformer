@@ -62,6 +62,8 @@ class pathLoader(Dataset):
 
 def getDataLoader(data_dir, batch_size, num_workers, train_or_test=False):
 
+    # TODO: The test dataset does not seem to be in this format.
+
     # dataset = datasets.ImageFolder(root=data_dir, transform=data_transform["train" if train_or_test else "test"])
     if data_dir == "./data/CIFAR10":
         dataset = datasets.CIFAR10(root=data_dir,
@@ -72,6 +74,19 @@ def getDataLoader(data_dir, batch_size, num_workers, train_or_test=False):
                                                                  transforms.Normalize([0.5, 0.5, 0.5],
                                                                                       [0.5, 0.5, 0.5])]),
                                    download=True)
+        dataloader = DataLoader(dataset,
+                                batch_size=batch_size,
+                                shuffle=train_or_test,
+                                num_workers=num_workers)
+    elif data_dir == "./data/CIFAR100":
+        dataset = datasets.CIFAR100(root=data_dir,
+                                    train=train_or_test,
+                                    transform=transforms.Compose([transforms.RandomResizedCrop(224),
+                                                                  transforms.RandomHorizontalFlip(),
+                                                                  transforms.ToTensor(),
+                                                                  transforms.Normalize([0.5, 0.5, 0.5],
+                                                                                       [0.5, 0.5, 0.5])]),
+                                    download=True)
         dataloader = DataLoader(dataset,
                                 batch_size=batch_size,
                                 shuffle=train_or_test,

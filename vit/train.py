@@ -14,12 +14,13 @@ from dataloader import getDataLoader
 from utils import remove_dir_and_create_dir, create_model, model_parallel
 
 
-def main(args):
+def train_test(args):
     # GPU
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-    # weight_dir = args.summary_dir + "/weights"
-    # remove_dir_and_create_dir(weight_dir)
+    # Record Weights
+    weights_dir = args.summary_dir + "/weights"
+    remove_dir_and_create_dir(weights_dir)
 
     # Record Logs
     log_dir = args.summary_dir + "/logs"
@@ -46,6 +47,18 @@ def main(args):
 
     # Create model
     model = create_model(args)
+
+    # If we have pre-trained weight and bias, we can just load them.
+    if args.weights != "":
+        assert os.path.exists(args.weights), "weights file: '{}' not exist.".format(args.weights)
+        weights_dict = torch.load(args.weights, map_location=device)
+        # Delete unnecessary weights
+        del_keys = ['head.weight', 'head.bias'] if model.has_logits \
+            else ['pre_logits.fc.weight', 'pre_logits.fc.bias', 'head.weight', 'head.bias']
+        for k in del_keys:
+            del weights_dict[k]
+        print(model.load_state_dict(weights_dict, strict=False))
+
     model = model_parallel(args, model)
     model.to(device)
 
@@ -54,9 +67,13 @@ def main(args):
 
     # Define optimizer
     params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = optim.SGD(params, lr=args.lr, momentum=0.9, weight_decay=0.3)
+    # TODO: Debug optimizer
+    optimizer = optim.SGD(params, lr=args.lr, momentum=0.9, weight_decay=5e-5)
+    # TODO: Consider that when dataset is not CIFAR-10, lf is linear
     lf = lambda x: ((1 + math.cos(x * math.pi / args.epochs)) / 2) * (1 - args.lrf) + args.lrf
+    # TODO: Consine Annealing
     scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lf)
+    # scheduler = lr_scheduler.CosineAnnealingLR(optimizer, eta_min=args.lrf, T_max=args.epochs)
 
     # Start training
     best_accuracy = 0.0
@@ -134,8 +151,8 @@ def main(args):
         # Judge whether this epoch has the best accuracy
         if test_accuracy > best_accuracy:
             best_accuracy = test_accuracy
-            # torch.save(model.state_dict(), "{}/epoch={}_test_accuracy={:.4f}.pth".format(weights_dir, epoch, val_accurate))
+            torch.save(model.state_dict(), "{}/epoch={}_test_accuracy={:.4f}.pth".format(weights_dir, epoch, test_accuracy))
 
 
 if __name__ == '__main__':
-    main(args)
+    train_test(args)

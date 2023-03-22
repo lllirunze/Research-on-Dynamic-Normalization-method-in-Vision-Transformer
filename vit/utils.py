@@ -4,12 +4,15 @@ import shutil
 from torch import nn
 
 from model_base import (vit_base_patch16_224_cifar10,
-                        vit_base_patch7_28_mnist)
+                        vit_base_patch7_28_mnist,
+                        vit_base_patch16_224_cifar100)
 
 def create_model(args):
 
     if args.model == 'vit_base_patch16_224_cifar10':
         model = vit_base_patch16_224_cifar10(args.num_classes, args.in_channels, has_logits=True)
+    elif args.model == 'vit_base_patch16_224_cifar100':
+        model = vit_base_patch16_224_cifar100(args.num_classes, args.in_channels, has_logits=True)
     elif args.model == 'vit_base_patch7_28_mnist':
         model = vit_base_patch7_28_mnist(args.num_classes, args.in_channels, has_logits=True)
     else:

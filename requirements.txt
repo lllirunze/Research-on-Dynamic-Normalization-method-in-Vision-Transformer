@@ -3,3 +3,4 @@ torchvision==0.13.0
 opencv-python
 numpy
 tqdm
+tensorboard

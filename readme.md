@@ -1,48 +1,123 @@
-## Research on Dynamic Normalization method in Vision Transformer
+# Research on Dynamic Normalization method in Vision Transformer
 
-### Abstract
+---
+
+## Abstract
 
 The dynamic feature normalization method of Transformer model is studied from the aspect of model regularization. It is proposed to use feature normalization instead of traditional layer normalization to achieve explicit Token value normalization and accelerate model convergence. Combined with the idea of parameter reorganization, a dynamic learnable feature normalization is proposed to improve the flexibility and computational efficiency of feature normalization.
 
-### Keywords
+---
+
+## Keywords
 
 - Vision Transformer
 - Learnable Dynamic Feature Normalization
 - Parameter Reorganization
 
-### Requirements
+---
+
+## Requirements
 
 ```commandline
 pip install -r requirements.txt
 ```
 
-### Progress
+---
 
-#### March 2, 2023
+## Train model
 
-ViT has reappeared at this stage, but the code can not run because the memory of GPU is too small.
-
-The error content is as follows.
+#### CIFAR-10
 
 ```commandline
-torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 58.00 MiB (GPU 0; 4.00 GiB total capacity; 3.34 GiB already allocated; 0 bytes free; 3.41 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+cd vit
+python train.py --num_classes 10 --epochs 300 --batch_size 128 --lr 0.01 --dataset_train_dir "./data/CIFAR10" --dataset_test_dir "./data/CIFAR10" --summary_dir "./summary/vit_base_patch16_224_cifar10" --model 'vit_base_patch16_224_cifar10'
 ```
 
-#### March 5, 2023
-
-'CUDA out of memory' has been solved by reducing batch size from 16 to 4, but there is another serious problem.
-
-The error content is as follows.
+#### CIFAR-100
 
 ```commandline
-RuntimeError: Unable to find a valid cuDNN algorithm to run convolution
+cd vit
+python train.py --num_classes 100 --epochs 300 --batch_size 128 --lr 0.01 --dataset_train_dir "./data/CIFAR100" --dataset_test_dir "./data/CIFAR100" --summary_dir "./summary/vit_base_patch16_224_cifar100" --model 'vit_base_patch16_224_cifar100'
 ```
 
-According to CSDN, it is because cudNN and CUDA version does not match.
+summary_dir can be '/home/sdf/lrz/summary/vit_base_patch16_224_cifar100'
 
-I need to change cudNN or CUDA version so that I can run these code.
+#### ImageNet-1k
 
-#### March 6, 2023: Debug
+```commandline
+TODO: Unknown
+```
+
+You can modify the config of your command such as epochs, batch size, etc.
+
+---
+
+## Update
+
+### March 22, 2023: First Attempt
+
+I have successfully experimented on lab's machine, which has 3 GPUs.
+
+Unfortunately, I didn't report the 30-epoch-experiment of CIFAR-10 because I accidentally deleted the data.
+
+However, I have reported the 50-epoch-experiment of CIFAR-100. The data is as follows.
+
+```commandline
+epoch 49: 100%|███████| 391/391 [04:44<00:00,  1.37it/s, loss=2.0035]
+=> train_loss: 2.0278, train_accuracy: 0.4650, test_loss: 2.5127, test_accuracy: 0.3715
+
+```
+
+What's more, the 50-epoch pre-train weights and bias has been stored in the machine. In the future, we can use these existing weights and bias to train more epochs in order to spare time.
+
+### March 21, 2023: Dynamic Token Normalization
+
+Dynamic Token Normalization(DTN) is performed both within each token(intra-token) and across different tokens(inter-token). DTN has several merits.
+
+- DTN is built on a unified formulation and thus can represent various existing normalization methods.
+- It learns to normalize tokens in both intra-token and inter-token manners,  enabling Transformers to capture both the global contextual information and the local positional context.
+- By simply replacing LN layers, DTN can be readily plugged into
+various vision transformers.
+
+### March 19, 2023: Unified Normalization
+
+Unified Normalization(UN) can speed up the inference by being fused with other linear operation and achieve comparable performance on par with LN.
+
+UN consists of **a unified framework** for leveraging offline methods, **a tailored fluctuation smoothing strategy** to mitigate the fluctuations and **an adaptive outlier filtration strategy** for stabilizing training.
+
+### March 18, 2023: Consult
+
+I have reported to Prof. Wang on the progress of Graduation Project and inquired about dynamic learnable normalization function.
+
+Prof. Wang gave me some suggestions and provided me with two papers on normalization function and one paper on parameter reorganization.
+
+Some devices for deep learning will be provided in the future.
+
+### March 8, 2023
+
+##### About Layer Normalization
+
+When input $X \in \mathbb{R}^{L \times B \times C}$ is a batch of a sequence of embeddings (which is applied in **ViT**), where $B$ is the batch size, $C$ is the number of channels, $L$ is the length of the sequence.
+
+$$\text{LN}(X) = \gamma \frac{X - \underset{C}{\mathbb{E}}[X]}{\sqrt{\underset{C}{Var}[X] + \epsilon}} + \beta$$
+
+where $\gamma \in \mathbb{R}^{C}$ and $\beta \in \mathbb{R}^{C}$.
+
+##### About Feature Normalization
+
+In the algorithm based on gradient descent, the feature normalization method is used to unify the dimension of the feature, which can improve the model convergence speed and the final model accuracy.
+
+###### Min-Max Scaling
+
+$$X_{norm} = \frac{X - X_{min}}{X_{max} - X_{min}}$$
+
+###### Z-Score Scaling
+
+$$X_{norm} = \frac{X - \mu}{\sigma}$$
+
+where $\mu = \frac{1}{N} \sum_{i=1}^{N} X_{i}$ , $\sigma = \sqrt{\frac{1}{N-1} \sum_{i=1}^{N}(X_{i}- \mu)^{2}}$.
+
+### March 6, 2023: Debug
 
 There is a ridiculous bug: number of classes = 5.
 
@@ -61,172 +136,33 @@ Specifically, each epoch needs to run for about one hour.
 
 I need to find one or more better GPU in order to produce results faster than before.
 
-#### March 8, 2023: Feature Normalization
+### March 5, 2023
 
-##### About Layer Normalization:
+'CUDA out of memory' has been solved by reducing batch size from 16 to 4, but there is another serious problem.
 
-When input $X \in \mathbb{R}^{L \times B \times C}$ is a batch of a sequence of embeddings (which is applied in **ViT**), where $B$ is the batch size, $C$ is the number of channels, $L$ is the length of the sequence.
-    
-$\gamma \in \mathbb{R}^{C}$ and $\beta \in \mathbb{R}^{C}$.
-    
-$$\text{LN}(X) = \gamma \frac{X - \underset{C}{\mathbb{E}}[X]}{\sqrt{\underset{C}{Var}[X] + \epsilon}} + \beta$$
+The error content is as follows.
 
-##### About Feature Normalization:
+```commandline
+RuntimeError: Unable to find a valid cuDNN algorithm to run convolution
+```
 
-In the algorithm based on gradient descent, the feature normalization method is used to unify the dimension of the feature, which can improve the model convergence speed and the final model accuracy.
+According to CSDN, it is because cudNN and CUDA version does not match.
 
-###### Min-Max Scaling
+I need to change cudNN or CUDA version so that I can run these code.
 
-$$X_{norm} = \frac{X - X_{min}}{X_{max} - X_{min}}$$
+### March 2, 2023
 
-###### Z-Score Scaling
+ViT has reappeared at this stage, but the code can not run because the memory of GPU is too small.
 
-$$X_{norm} = \frac{X - \mu}{\sigma}$$
+The error content is as follows.
 
-where $\mu = \frac{1}{N} \sum_{i=1}^{N} X_{i}$ , $\sigma = \sqrt{\frac{1}{N-1} \sum_{i=1}^{N}(X_{i}- \mu)^{2}}$ .
+```commandline
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 58.00 MiB (GPU 0; 4.00 GiB total capacity; 3.34 GiB already allocated; 0 bytes free; 3.41 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+```
 
-#### March 11, 2023
+---
 
-Finish Min-Max Scaling of Pytorch, whose test has not been carried out yet.
-
-#### March 12, 2023
-
-Finish Z-Score Scaling of Pytorch, whose test hasn't been carried out yet.
-
-#### March 18, 2023: Consult
-
-I have reported to Prof. Wang on the progress of Graduation Project and inquired about dynamic learnable normalization function.
-
-Prof. Wang gave me some suggestions and provided me with two papers on normalization function and one paper on parameter reorganization.
-
-Some devices for deep learning will be provided in the future.
-
-#### March 19, 2023: Unified Normalization
-
-Unified Normalization(UN) can speed up the inference by being fused with other linear operation and achieve comparable performance on par with LN.
-
-UN consists of **a unified framework** for leveraging offline methods, **a tailored fluctuation smoothing strategy** to mitigate the fluctuations and **an adaptive outlier filtration strategy** for stabilizing training.
-
-##### 1 Unified Framework
-
-###### Forward Propagation:
-
-$$ Z_{t} = \frac{X_{t}- \hat{\mu_{t}}}{\sqrt{\hat{\sigma_{t}}^{2} + \epsilon}} $$
-
-$$ Y_{t} = \gamma \cdot Z_{t} + \beta $$
-
-Let $Z_{t}$ denote the normalized alternative to input $X_{t}$ at iteration $t$. The training statistics for normalizing are marked as $\hat{\mu_{t}}$ and $\hat{\sigma_{t}}^{2}$, given by
-
-$$ \hat{\mu_{t}} = \Theta_{\mu}(\mu_{t}, \cdots, \mu_{t-M+1}) $$
-
-$$ \hat{\sigma_{t}}^{2} = \Theta_{\sigma^{2}}(\sigma_{t}^{2}, \cdots, \sigma_{t-M+1}^{2}) $$
-
-###### Backward Propagation:
-
-The gradients of loss $L$ pass as:
-
-$$ \frac{\partial L}{\partial Z_{t}} = \gamma \cdot \frac{\partial L}{\partial Y_{t}} $$
-
-$$ \frac{\partial L}{\partial X_{t}} = \frac{1}{\sqrt{\hat{\sigma_{t}}^{2} + \epsilon}} (\frac{\partial L}{\partial Z_{t}} - \psi_{\hat{\mu_{t}}} - Z_{t} \cdot \psi_{\hat{\sigma_t}^{2}}) $$
-
-Giving gradients $\frac{\partial L}{\partial Y_{t}}$, $\psi_{\hat{\mu_{t}}}$ and $\psi_{\hat{\sigma_t}^{2}}$ indicate the gradient statistics that used for estimating $\frac{\partial L}{\partial X_{t}}$. In this framework, estimated gradients are gained from averaging functions $\Theta_{g_{\mu}}$ and $\Theta_{g_{\sigma^{2}}}$,
-
-$$ \psi_{\hat{\mu_{t}}} = \Theta_{g_{\mu}}(g_{\hat{\mu_{t}}}, \cdots, g_{\hat{\mu}_{t-M+1}}) $$
-
-$$ \psi_{\hat{\sigma_{t}}^{2}} = \Theta_{g_{\sigma^{2}}}(g_{\hat{\sigma_{t}}^{2}}, \cdots, g_{\hat{\sigma}_{t-M+1}^{2}}) $$
-
-The gradients passed from $\hat{\mu_{t}}$ and $\hat{\sigma_{t}}^{2}$ are denoted as $g_{\hat{\mu_t}}$ and $g_{\hat{\sigma_{t}}^{2}}$.
-
-##### 2 Fluctuation Smoothing
-
-We turn ot adopt geometric mean(GM) with less sensitivity to outliers instead of arithmetic mean(AM) to gain a better representation of activation statistics in a skewed distribution.
-
-The averaging functions are defined as:
-
-$$\hat{\mu_{t}} = 0,\quad \hat{\sigma_{t}}^{2} = \sqrt[M]{\prod_{i=0}^{M-1} \sigma_{t-i}^{2}}$$
-
-$$\psi_{\hat{\mu_{t}}} = 0, \quad \psi_{\hat{\sigma}_{t}^{2}} = \alpha \psi_{\hat{\sigma}_{t-1}^{2}} + (1- \alpha)\frac{1}{M} \sum_{i=0}^{M-1} g_{\hat{\sigma}_{t-1}^{2}}$$
-
-##### 3 Outlier Filtration
-
-The main goal of outlier filtration is to decide when to apply the moving average strategies.
-
-To identify outliers, we set an adaptive threshold for outlier filtration with the $AM - GM$ *inequality*.
-
-Let $\Omega_{t} = (\sigma_{t}^{2}, \sigma_{t-1}^{2}, \cdots, \sigma_{t-M+1}^{2})$ denote the $M$ recent activation statistics recorded in forward propagation at iteration $t$, where $M>1$, then we have
-
-$$E(\Omega_{t}) - \Pi(\Omega_{t}) \le M \cdot V(\Omega_{t}^{\frac{1}{2}})$$
-
-where $\Omega_{t}^{\frac{1}{2}} = (\sigma_{t}, \sigma_{t-1}, \cdots, \sigma_{t-M+1})$ and $V(\cdot)$, $E(\cdot)$, $\Pi(\cdot)$ are operators that calculate the variance, arithmetic mean, and geometric mean for input respectively.
-
-Once the mini-batch is deemed to contain extremely large outliers and all the moving average strategies will be dropped in a specific normalization layer.
-
-If $E(\Omega_{t}) - \Pi(\Omega_{t}) > M \cdot V(\Omega_{t}^{\frac{1}{2}})$,
-
-$$\hat{\sigma}_{t}^{2} = \sigma_{t}^{2}, \quad \psi_{\hat{\sigma}_{t}^{2}} = g_{\hat{\sigma}_{t}^{2}}$$
-
-else,
-
-$$\hat{\sigma_{t}}^{2} = \sqrt[M]{\prod_{i=0}^{M-1} \sigma_{t-i}^{2}},\quad \psi_{\hat{\sigma}_{t}^{2}} = \alpha \psi_{\hat{\sigma}_{t-1}^{2}} + (1- \alpha)\frac{1}{M} \sum_{i=0}^{M-1} g_{\hat{\sigma}_{t-1}^{2}}$$
-
-#### March 21, 2023: Dynamic Token Normalization
-
-Dynamic Token Normalization(DTN) is performed both within each token(intra-token) and across different tokens(inter-token). DTN has several merits.
-
-- DTN is built on a unified formulation and thus can represent various existing normalization methods.
-- It learns to normalize tokens in both intra-token and inter-token manners,  enabling Transformers to capture both the global contextual information and the local positional context.
-- By simply replacing LN layers, DTN can be readily plugged into
-various vision transformers.
-
-##### 1 Defination
-
-Given the feature of tokens $\boldsymbol{x} \in \mathbb{R}^{T \times C}$, DTN normalizes it through
-
-$$\tilde{\boldsymbol{x}} = \gamma \frac{\boldsymbol{x} - Concate_{h \in [H]} \{ \pmb{\mu}^{h} \}}{\sqrt{Concate_{h \in [H]} \{ (\pmb{\sigma}^{2})^{h} \} + \epsilon}} + \beta$$
-
-where $\pmb{\gamma}$, $\pmb{\beta}$ are two $C \times 1$ vectors by stacking all $\gamma_{c}$ and $\beta_{c}$ into a column, and $\pmb{\mu}^{h} \in \mathbb{R}^{T \times \frac{C}{H}}$, $(\pmb{\sigma}^{2})^{h} \in \mathbb{R}^{T \times \frac{C}{H}}$ are normalization constants of DTN in head $h$ where $H$ denotes the number of heads in transformer.
-
-The $Concate$ notation indicates that DTN concatenates normalization constants from different heads.
-
-##### 2 Normalization constants
-
-DTN obtains normalization constants by trading off intra- and inter-token statistics as given by
-
-$$\pmb{\mu}^{h} = \lambda^{h}(\pmb{\mu}^{ln})^{h} + (1-\lambda^{h})\boldsymbol{P}^{h}\boldsymbol{x}^{h}$$
-
-$$(\pmb{\sigma}^{2})^{h} = \lambda^{h}((\pmb{\sigma}^{2})^{ln})^{h} + (1-\lambda^{h})[\boldsymbol{P}^{h}(\boldsymbol{x}^{h} \odot \boldsymbol{x}^{h}) - (\boldsymbol{P}^{h}\boldsymbol{x}^{h} \odot \boldsymbol{P}^{h}\boldsymbol{x}^{h})]$$
-
-where $(\pmb{\mu}^{ln})^{h} \in \mathbb{R}^{T \times \frac{C}{H}}$, $((\pmb{\sigma}^{2})^{ln})^{h} \in \mathbb{R}^{T \times \frac{C}{H}}$ are intra-token mean and variance obtained by stacking all $\mu_{t}^{ln}$ and $(\sigma^{2})_{t}^{ln}$ as given by
-
-$$\mu_{t}^{ln} = \frac{1}{C}\sum_{c=1}^{C}x_{tc}$$
-
-$$(\sigma^{2})_{t}^{ln} = \frac{1}{C}\sum_{c=1}^{C}(x_{tc} - \mu_{t}^{ln})^{2}$$
-
-and then broadcasting it for $\frac{C}{H}$ columns, $\boldsymbol{x}^{h} \in \mathbb{R}^{T \times \frac{C}{H}}$ represents token embeddings in the head $h$ of $\boldsymbol{x}$, and $\boldsymbol{P}^{h}\boldsymbol{x}^{h} \in \mathbb{R}^{T \times \frac{C}{H}}$, $[\boldsymbol{P}^{h}(\boldsymbol{x}^{h} \odot \boldsymbol{x}^{h}) - (\boldsymbol{P}^{h}\boldsymbol{x}^{h} \odot \boldsymbol{P}^{h}\boldsymbol{x}^{h})] \in \mathbb{R}^{T \times \frac{C}{H}}$ are expected to represent inter-token mean and variance respectively. Toward this goal, we define $\boldsymbol{P}^{h}$ as a $T \times T$ learnable matrix satisfying that the sum of each row equals 1. Moreover, DTN utilizes a learnable weight ratio $\lambda^{h} \in [0, 1]$ to trade off intra-token and inter-token statistics.
-
-##### 3 Representation Capacity
-
-When $\lambda^{h} = 1$, we have $\pmb{\mu}^{h} = (\pmb{\mu}^{ln})^{h}$ and $(\pmb{\sigma}^{2})^{h} = ((\pmb{\sigma}^{2})^{ln})^{h}$. Hence, DTN degrades into LN.
-
-When $\lambda^{h} = 0$ and $\boldsymbol{P}^{h} = \frac{1}{T} \mathbf{1}$, we have $\pmb{\mu}^{h} = \frac{1}{T} \mathbf{1} \boldsymbol{x}^{h}$ and $(\pmb{\sigma}^{2})^{h} = \frac{1}{T} \mathbf{1} (\boldsymbol{x}^{h} \odot \boldsymbol{x}^{h}) - (\frac{1}{T} \mathbf{1} \boldsymbol{x}^{h} \odot \frac{1}{T} \mathbf{1} \boldsymbol{x}^{h})$. Therefore, DTN becomes IN in this case.
-
-##### 4 Construction of $P^{h}$
-
-We employ positional self-attention with relative positional embedding to generate positional attention matrix $\boldsymbol{P}^{h}$ as given by
-
-$$\boldsymbol{P}^{h} = softmax(\boldsymbol{R}\boldsymbol{a}^{h})$$
-
-where $\boldsymbol{R} \in \mathbb{R}^{T \times T \times 3}$ is a constant tensor representing the relative positional embedding. To embed the relative position between image patches, we instantiate $\boldsymbol{R}_{ij}$ as written by 
-
-$$\boldsymbol{R}_{ij} = [(\delta_{ij}^{x})^{2}+(\delta_{ij}^{y})^{2}, \delta_{ij}^{x},\delta_{ij}^{y}]^{T}$$
-
-where $\delta_{ij}^{x}$ and $\delta_{ij}^{y}$ are relative horizontal and vertical shifts between patch $i$ and patch $j$ respectively. Moreover, $\boldsymbol{a}^{h} \in \mathbb{R}^{3 \times 1}$ are learnable parameters for each head. By initializing $\boldsymbol{a}^{h}$ as equation below, $\boldsymbol{P}^{h}$ gives larger weights to tokens in the neighborhood of size $\sqrt{H} \times \sqrt{H}$ relative to the underlying token,
-
-$$\boldsymbol{a}^{h} = [-1, 2\Delta_{1}^{h}, 2\Delta_{2}^{h}]^{T}$$
-
-where $\pmb{\Delta}^{h} = [\Delta_{1}^{h}, \Delta_{2}^{h}]$ is each of the possible positional offsets of the neighborhood of size $\sqrt{H} \times \sqrt{H}$ relative to the underlying token.
-
-### Reference
+## Reference
 
 - [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
