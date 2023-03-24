@@ -52,12 +52,18 @@ def train_test(args):
     if args.weights != "":
         assert os.path.exists(args.weights), "weights file: '{}' not exist.".format(args.weights)
         weights_dict = torch.load(args.weights, map_location=device)
+        '''
         # Delete unnecessary weights
-        del_keys = ['head.weight', 'head.bias'] if model.has_logits \
-            else ['pre_logits.fc.weight', 'pre_logits.fc.bias', 'head.weight', 'head.bias']
+        del_keys = ['module.head.weight', 'module.head.bias'] if model.has_logits else ['pre_logits.fc.weight', 'pre_logits.fc.bias', 'module.head.weight', 'module.head.bias']
         for k in del_keys:
             del weights_dict[k]
-        print(model.load_state_dict(weights_dict, strict=False))
+        '''
+        # TODO: Delete 'module.'
+        weights = {}
+        for k, v in weights_dict.items():
+            new_k = k.replace('module.', '') if 'module' in k else k
+            weights[new_k] = v
+        print(model.load_state_dict(weights, strict=False))
 
     model = model_parallel(args, model)
     model.to(device)

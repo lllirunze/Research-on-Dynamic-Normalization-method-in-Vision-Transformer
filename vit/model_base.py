@@ -2,6 +2,7 @@ import torch
 from torch import nn
 
 from functools import partial
+from collections import OrderedDict
 
 class PatchEmbed(nn.Module):
     """
@@ -293,7 +294,8 @@ class VisionTransformer(nn.Module):
                  attn_drop_ratio=0.1,
                  embed_layer=PatchEmbed,
                  act_layer=None,
-                 norm_layer=nn.LayerNorm):
+                 norm_layer=nn.LayerNorm,
+                 has_logits=True):
         """
         Vision Transformer network architecture
         :param image_size: image size
@@ -328,7 +330,9 @@ class VisionTransformer(nn.Module):
         num_patches = self.patch_embed.num_patches
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
         self.position_embed = nn.Parameter(torch.zeros(1, num_patches+1, embed_dim))
+        self.position_drop = nn.Dropout(p=drop_ratio)
         self.layers = layers
+        self.has_logits = has_logits
         """
         self.transformer_encoder = nn.Sequential(*[
             TransformerEncoder(dim=embed_dim,
@@ -352,9 +356,26 @@ class VisionTransformer(nn.Module):
                                                       attn_drop_ratio=attn_drop_ratio, 
                                                       act_layer=act_layer, 
                                                       norm_layer=norm_layer)
+        '''
         self.mlp_head = MLPClassificationHead(embed_dim=embed_dim,
                                               num_classes=num_classes,
                                               representation_size=representation_size)
+        '''
+        if self.representation_size is not None:
+            self.hidden_dim = representation_size
+            self.pre_logits = nn.Sequential(OrderedDict([
+                ("fc", nn.Linear(embed_dim, representation_size)),
+                ("act", nn.Tanh())
+            ]))
+        else:
+            self.hidden_dim = embed_dim
+            self.pre_logits = nn.Identity()
+        self.head = nn.Linear(self.hidden_dim, num_classes)
+
+        # Weight init
+        nn.init.trunc_normal_(self.position_embed, std=0.02)
+        nn.init.trunc_normal_(self.cls_token, std=0.02)
+        self.apply(_init_vit_weights)
 
     def forward(self, x):
         # Patch Embedding
@@ -366,7 +387,7 @@ class VisionTransformer(nn.Module):
         cls_token = self.cls_token.expand(x.shape[0], -1, -1)
         # [B, N, C] -> [B, 1+N, C]
         x = torch.cat((cls_token, x), dim=1)
-        x = x + self.position_embed
+        x = self.position_drop(x + self.position_embed)
 
         # Transformer Encoder (L layers)
         # [B, 1+N, C]
@@ -382,9 +403,28 @@ class VisionTransformer(nn.Module):
         # [B, 1+N, C] -> [B, C]
         x = x[:, 0]
         # [B, C] -> [B, num_classes]
-        x = self.mlp_head(x)
+        # x = self.mlp_head(x)
+        x = self.pre_logits(x)
+        x = self.head(x)
 
         return x
+
+def _init_vit_weights(m):
+    """
+    ViT weight initialization
+    :param m: module
+    """
+    if isinstance(m, nn.Linear):
+        nn.init.trunc_normal_(m.weight, std=.01)
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+    elif isinstance(m, nn.Conv2d):
+        nn.init.kaiming_normal_(m.weight, mode="fan_out")
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+    elif isinstance(m, nn.LayerNorm):
+        nn.init.zeros_(m.bias)
+        nn.init.ones_(m.weight)
 
 def vit_base_patch16_224_cifar10(num_classes: int=10, in_channels: int=3, has_logits: bool=True):
 
@@ -395,7 +435,8 @@ def vit_base_patch16_224_cifar10(num_classes: int=10, in_channels: int=3, has_lo
                               embed_dim=768,
                               representation_size=768 if has_logits else None,
                               layers=12,
-                              num_heads=12)
+                              num_heads=12,
+                              has_logits=has_logits)
 
     return model
 
@@ -408,7 +449,8 @@ def vit_base_patch16_224_cifar100(num_classes: int=100, in_channels: int=3, has_
                               embed_dim=768,
                               representation_size=768 if has_logits else None,
                               layers=12,
-                              num_heads=12)
+                              num_heads=12,
+                              has_logits=has_logits)
 
     return model
 
@@ -421,6 +463,7 @@ def vit_base_patch7_28_mnist(num_classes: int=10, in_channels: int=1, has_logits
                               embed_dim=64,
                               representation_size=64 if has_logits else None,
                               layers=6,
-                              num_heads=8)
+                              num_heads=8,
+                              has_logits=has_logits)
 
     return model

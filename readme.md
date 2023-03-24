@@ -52,11 +52,23 @@ You can modify the config of your command such as epochs, batch size, etc.
 
 ---
 
+## Train model with pre-trained weights
+
+The example is as follows.
+
+```commandline
+python train.py --num_classes 100 --epochs 300 --batch_size 128 --lr 0.01 --dataset_train_dir "./data/CIFAR100" --dataset_test_dir "./data/CIFAR100" --summary_dir "./summary/vit_base_patch16_224_cifar100" --weights '/home/sdf/lrz/summary/vit_base_patch16_224_cifar100/weights/xxx.pth' --model 'vit_base_patch16_224_cifar100'
+```
+
 ## Update
+
+### March 23, 2023: Store weights and bias
+
+The parameters such as weights and bias can be stored in the .pth files. As a result, we can use them to continue our experiment although previous ones are forced termination for the sake of some strange conditions.
 
 ### March 22, 2023: First Attempt
 
-I have successfully experimented on lab's machine, which has 3 GPUs.
+I have successfully implemented on lab's machine, which has 3 GPUs.
 
 Unfortunately, I didn't report the 30-epoch-experiment of CIFAR-10 because I accidentally deleted the data.
 
