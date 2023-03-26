@@ -45,7 +45,8 @@ summary_dir can be '/home/sdf/lrz/summary/vit_base_patch16_224_cifar100'
 #### ImageNet-1k
 
 ```commandline
-TODO: Unknown
+cd vit
+python train.py --num_classes 1000 --epochs 300 --batch_size 128 --lr 0.01 --dataset_train_dir "./data/ImageNet" --dataset_test_dir "./data/ImageNet" --summary_dir "./summary/vit_base_patch16_224_imagenet" --model 'vit_base_patch16_224_imagenet'
 ```
 
 You can modify the config of your command such as epochs, batch size, etc.
@@ -62,11 +63,23 @@ python train.py --num_classes 100 --epochs 300 --batch_size 128 --lr 0.01 --data
 
 ## Update
 
+### March 27, 2023: Debug
+
+The 'dataloader' file has serious bug and I have debugged.
+
+Now, the 'getData' function has been divided into two functions named 'getTrainData' and 'getTestData'.
+
+Theoretically, the accuracy of training and testing will increase after 1200 epochs.
+
+What's more, I have added the function which can load ImageNet dataset. After the experiment of CIFAR-100, we can experiment for ImageNet.
+
 ### March 26, 2023
 
 After 300 epochs, we got the accuracy of ViT model including training accuracy: 86.99% and test accuracy: 40.00%.
 
-Actually, the accuracy of base model isn't high enough but the accuracy cannot improve with the increase of epoch.
+Actually, the result is too bad.
+
+The accuracy of base model isn't high enough but the accuracy cannot improve with the increase of epoch.
 
 ### March 23, 2023: Store weights and bias
 

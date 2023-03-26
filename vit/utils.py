@@ -4,8 +4,8 @@ import shutil
 from torch import nn
 
 from model_base import (vit_base_patch16_224_cifar10,
-                        vit_base_patch7_28_mnist,
-                        vit_base_patch16_224_cifar100)
+                        vit_base_patch16_224_cifar100,
+                        vit_base_patch16_224_imagenet)
 
 def create_model(args):
 
@@ -13,8 +13,8 @@ def create_model(args):
         model = vit_base_patch16_224_cifar10(args.num_classes, args.in_channels, has_logits=True)
     elif args.model == 'vit_base_patch16_224_cifar100':
         model = vit_base_patch16_224_cifar100(args.num_classes, args.in_channels, has_logits=True)
-    elif args.model == 'vit_base_patch7_28_mnist':
-        model = vit_base_patch7_28_mnist(args.num_classes, args.in_channels, has_logits=True)
+    elif args.model == 'vit_base_patch16_224_imagenet':
+        model = vit_base_patch16_224_imagenet(args.num_classes, args.in_channels, has_logits=True)
     else:
         raise Exception("Error: Can't find any model name called {}.".format(args.model))
 

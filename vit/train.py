@@ -10,7 +10,7 @@ import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.tensorboard import SummaryWriter
 
 from config import args
-from dataloader import getDataLoader
+from dataloader import getTrainDataLoader, getTestDataLoader
 from utils import remove_dir_and_create_dir, create_model, model_parallel
 
 
@@ -32,15 +32,23 @@ def train_test(args):
     print('Using {} dataloader workers every process.'.format(number_of_workers))
 
     # Get dataset
+    '''
     train_loader, train_dataset = getDataLoader(data_dir=args.dataset_train_dir,
                                                 batch_size=args.batch_size,
                                                 num_workers=number_of_workers,
                                                 train_or_test=True)
-    number_of_train = len(train_dataset)
     test_loader, test_dataset = getDataLoader(data_dir=args.dataset_test_dir,
                                               batch_size=args.batch_size,
                                               num_workers=number_of_workers,
                                               train_or_test=False)
+    '''
+    train_loader, train_dataset = getTrainDataLoader(data_dir=args.dataset_train_dir,
+                                                     batch_size=args.batch_size,
+                                                     num_workers=number_of_workers)
+    test_loader, test_dataset = getTestDataLoader(data_dir=args.dataset_test_dir,
+                                                  batch_size=args.batch_size,
+                                                  num_workers=number_of_workers)
+    number_of_train = len(train_dataset)
     number_of_test = len(test_dataset)
     print('Using {} images for training.'.format(number_of_train))
     print('Using {} images for testing.'.format(number_of_test))
