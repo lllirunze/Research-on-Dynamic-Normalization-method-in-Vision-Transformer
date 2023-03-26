@@ -62,6 +62,12 @@ python train.py --num_classes 100 --epochs 300 --batch_size 128 --lr 0.01 --data
 
 ## Update
 
+### March 26, 2023
+
+After 300 epochs, we got the accuracy of ViT model including training accuracy: 86.99% and test accuracy: 40.00%.
+
+Actually, the accuracy of base model isn't high enough but the accuracy cannot improve with the increase of epoch.
+
 ### March 23, 2023: Store weights and bias
 
 The parameters such as weights and bias can be stored in the .pth files. As a result, we can use them to continue our experiment although previous ones are forced termination for the sake of some strange conditions.

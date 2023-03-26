@@ -82,7 +82,7 @@ def train_test(args):
     # scheduler = lr_scheduler.CosineAnnealingLR(optimizer, eta_min=args.lrf, T_max=args.epochs)
 
     # Start training
-    best_accuracy = 0.0
+    # best_accuracy = 0.0
 
     for epoch in range(args.epochs):
         # Train model
@@ -154,10 +154,15 @@ def train_test(args):
         writer.add_scalar("test_accuracy", test_accuracy, epoch)
         writer.add_scalar("learning_rate", optimizer.param_groups[0]["lr"], epoch)
 
+        if (epoch+1) % 50 == 0:
+            torch.save(model.state_dict(), "{}/epoch={}_train_acc={:.4f}_test_acc={:.4f}.pth".format(weights_dir, epoch+1, train_accuracy, test_accuracy))
+
+        '''
         # Judge whether this epoch has the best accuracy
         if test_accuracy > best_accuracy:
             best_accuracy = test_accuracy
             torch.save(model.state_dict(), "{}/epoch={}_test_accuracy={:.4f}.pth".format(weights_dir, epoch, test_accuracy))
+        '''
 
 
 if __name__ == '__main__':
