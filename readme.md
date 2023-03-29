@@ -26,27 +26,22 @@ pip install -r requirements.txt
 
 ## Train model
 
-#### CIFAR-10
+#### CIFAR-10 & Vit-S
 
 ```commandline
-cd vit
-python train.py --num_classes 10 --epochs 300 --batch_size 128 --lr 0.01 --dataset_train_dir "./data/CIFAR10" --dataset_test_dir "./data/CIFAR10" --summary_dir "./summary/vit_base_patch16_224_cifar10" --model 'vit_base_patch16_224_cifar10'
+python train.py --num_classes 10 --model "vit-s" --data "cifar10" --summary_dir "./summary/vit_small_cifar10"
 ```
 
-#### CIFAR-100
+#### CIFAR-100 & Vit-S
 
 ```commandline
-cd vit
-python train.py --num_classes 100 --epochs 300 --batch_size 128 --lr 0.01 --dataset_train_dir "./data/CIFAR100" --dataset_test_dir "./data/CIFAR100" --summary_dir "./summary/vit_base_patch16_224_cifar100" --model 'vit_base_patch16_224_cifar100'
+python train.py --num_classes 100 --model "vit-s" --data "cifar100" --summary_dir "./summary/vit_small_cifar100"
 ```
 
-summary_dir can be '/home/sdf/lrz/summary/vit_base_patch16_224_cifar100'
-
-#### ImageNet-1k
+#### ImageNet-1k & Vit-S
 
 ```commandline
-cd vit
-python train.py --num_classes 1000 --epochs 300 --batch_size 128 --lr 0.01 --dataset_train_dir "./data/ImageNet" --dataset_test_dir "./data/ImageNet" --summary_dir "./summary/vit_base_patch16_224_imagenet" --model 'vit_base_patch16_224_imagenet'
+python train.py --num_classes 1000 --model "vit-s" --data "imagenet1k" --summary_dir "./summary/vit_small_imagenet1k"
 ```
 
 You can modify the config of your command such as epochs, batch size, etc.
@@ -55,13 +50,28 @@ You can modify the config of your command such as epochs, batch size, etc.
 
 ## Train model with pre-trained weights
 
+summary_dir can be '/home/sdf/lrz/summary/vit_small_patch16_224_cifar100'
+
+
 The example is as follows.
 
 ```commandline
-python train.py --num_classes 100 --epochs 300 --batch_size 128 --lr 0.01 --dataset_train_dir "./data/CIFAR100" --dataset_test_dir "./data/CIFAR100" --summary_dir "./summary/vit_base_patch16_224_cifar100" --weights '/home/sdf/lrz/summary/vit_base_patch16_224_cifar100/weights/xxx.pth' --model 'vit_base_patch16_224_cifar100'
+python train.py --num_classes 10 --model "vit-s" --data "cifar10" --summary_dir "./summary/vit_small_cifar10" --weights "/home/sdf/lrz/summary/vit_small_patch16_224_cifar10"
 ```
 
 ## Update
+
+### March 29, 2023: Code refactoring
+
+All the file has been refactored because of terrible results. The results of CIFAR-10 and CIFAR-100 has been closed to original paper after code refactoring.
+
+For the sake of weak computing power, I choose vit-small as test model, which can get results faster.
+
+###### Reference code:
+
+- https://github.com/lucidrains/vit-pytorch
+- https://github.com/DeepVoltaire/AutoAugment
+
 
 ### March 27, 2023: Debug
 
