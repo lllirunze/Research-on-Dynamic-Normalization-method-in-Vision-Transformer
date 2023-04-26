@@ -82,6 +82,7 @@ class DTN(nn.Module):
 
         # statistics of position-aware IN
         H, W = self.resolution
+        # TODO: T 是 H*W+1
         assert T == H * W, "input feature {} has wrong size {}".format(input.shape, self.resolution)
         # input_.shape: [B, C, H, W]
         input_ = input.view(B, H, W, C).permute(0, 3, 1, 2).contiguous()

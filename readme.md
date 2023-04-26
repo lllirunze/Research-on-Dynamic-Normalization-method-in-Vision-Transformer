@@ -52,14 +52,45 @@ You can modify the config of your command such as epochs, batch size, etc.
 
 summary_dir can be '/home/sdf/lrz/summary/vit_small_patch16_224_cifar100'
 
-
 The example is as follows.
 
 ```commandline
 python train.py --num_classes 10 --model "vit-s" --data "cifar10" --summary_dir "./summary/vit_small_cifar10" --weights "/home/sdf/lrz/summary/vit_small_patch16_224_cifar10"
 ```
 
+## Result
+
+- Dataset: __CIFAR-10__
+- batch-size: 128
+- epochs: 1200
+
+| model | normalization | Top-1 acc |
+| :--: | :--: | :--: |
+|ViT-S|LN|0.9188|
+|ViT-S|UN|0.8952|
+|ViT-S|DTN|0.9296|
+|T2T-ViT-S|LN| __0.9314__ |
+|T2T-ViT-S|UN|0.9056|
+|T2T-ViT-S|DTN|Unknown|
+
+- Dataset: __CIFAR-100__
+- batch-size: 128
+- epochs: 1200
+
+| model | normalization | Top-1 acc |
+| :--: | :--: | :--: |
+|ViT-S|LN|Unknown|
+|ViT-S|UN|Unknown|
+|ViT-S|DTN|Unknown|
+|T2T-ViT-S|LN|Unknown|
+|T2T-ViT-S|UN|Unknown|
+|T2T-ViT-S|DTN|Unknown|
+
 ## Update
+
+### April 26, 2023: 
+
+Since April 1st, I have started my experiment. Now the process has been in the middle, and the result of experiment is in the __'Result'__ module.
 
 ### March 29, 2023: Code refactoring
 

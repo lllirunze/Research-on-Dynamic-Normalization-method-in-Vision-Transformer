@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import functools
 import random
 import numpy as np
 import torch
@@ -16,6 +17,12 @@ import argparse
 import shutil
 from torch.utils.tensorboard import SummaryWriter
 from vit import ViT
+from vit_dtn import ViT_DTN
+from vit_un import ViT_UN
+from t2t_vit import T2T_ViT
+from t2t_vit_dtn import T2T_ViT_DTN
+from t2t_vit_un import T2T_ViT_UN
+from UN.unified_normalization import UN1d
 from autoaugment import CIFAR10Policy, ImageNetPolicy
 
 parser = argparse.ArgumentParser()
@@ -180,6 +187,56 @@ def train(args):
                     heads=6,
                     mlp_dim=1536,
                     dropout=args.dropout)
+    elif args.model == 'vit-s-dtn':
+        model = ViT_DTN(img_size=args.image_size,
+                        patch_size=args.patch_size,
+                        num_classes=args.num_classes,
+                        embed_dim=384,
+                        depth=12,
+                        num_heads=6,
+                        mlp_ratio=4.)
+    elif args.model == 'vit-s-un':
+        norm_layer_ = functools.partial(UN1d, window_size=4, warmup_iters=4000, outlier_filtration=True)
+        model = ViT_UN(image_size=args.image_size,
+                       patch_size=args.patch_size,
+                       num_classes=args.num_classes,
+                       dim=384,
+                       depth=12,
+                       heads=6,
+                       mlp_dim=1536,
+                       dropout=args.dropout,
+                       norm_layer=norm_layer_)
+    elif args.model == 't2t-vit-s':
+        model = T2T_ViT(image_size=args.image_size,
+                        patch_size=args.patch_size,
+                        num_classes=args.num_classes,
+                        dim=384,
+                        depth=12,
+                        heads=6,
+                        mlp_dim=1536,
+                        dropout=args.dropout,
+                        norm_layer=nn.LayerNorm)
+    elif args.model == 't2t-vit-s-un':
+        norm_layer_ = functools.partial(UN1d, window_size=4, warmup_iters=4000, outlier_filtration=True)
+        model = T2T_ViT_UN(image_size=args.image_size,
+                           patch_size=args.patch_size,
+                           num_classes=args.num_classes,
+                           dim=384,
+                           # depth=12,
+                           depth=14,
+                           heads=6,
+                           # mlp_dim=1536,
+                           mlp_dim=1152,
+                           dropout=args.dropout,
+                           norm_layer=norm_layer_)
+    elif args.model == 't2t-vit-s-dtn':
+        model = T2T_ViT_DTN(img_size=args.image_size,
+                            patch_size=args.patch_size,
+                            num_classes=args.num_classes,
+                            embed_dim=384,
+                            depth=12,
+                            num_heads=6,
+                            mlp_ratio=4.)
     else:
         raise Exception("Error: Can't find any model name called {}.".format(args.model))
 
@@ -247,38 +304,48 @@ def train(args):
             # Clear batch variables from memory
             del images, labels
 
-        # Test model
-        model.eval()
-        # Define test accuracy and loss
-        test_accuracy = 0.0
-        test_loss = 0.0
-        with torch.no_grad():
-            for data in test_loader:
-                # Get images and labels
-                images, labels = data
-                images = images.to(device)
-                labels = labels.to(device)
-                # Input the data into model
-                outputs = model(images)
-                # Calculate the loss
-                loss = loss_function(outputs, labels)
-                prediction = (outputs.argmax(dim=1) == labels).float().mean()
-                # Print statistics
-                test_loss += (loss.item()) / len(test_loader)
-                test_accuracy += prediction / len(test_loader)
-                # Clear batch variables from memory
-                del images, labels
+        # Test model every 50 epochs
+        if (epoch + 1) % 50 == 0:
+            model.eval()
+            # Define test accuracy and loss
+            test_accuracy = 0.0
+            test_loss = 0.0
+            with torch.no_grad():
+                for data in test_loader:
+                    # Get images and labels
+                    images, labels = data
+                    images = images.to(device)
+                    labels = labels.to(device)
+                    # Input the data into model
+                    outputs = model(images)
+                    # Calculate the loss
+                    loss = loss_function(outputs, labels)
+                    prediction = (outputs.argmax(dim=1) == labels).float().mean()
+                    # Print statistics
+                    test_loss += (loss.item()) / len(test_loader)
+                    test_accuracy += prediction / len(test_loader)
+                    # Clear batch variables from memory
+                    del images, labels
 
-        # Statistics of data
-        print("=> train_loss: {:.4f}, train_accuracy: {:.4f}, test_loss: {:.4f}, test_accuracy: {:.4f}".
-              format(train_loss, train_accuracy, test_loss, test_accuracy))
+            # Statistics of data
+            print("=> train_loss: {:.4f}, train_accuracy: {:.4f}, test_loss: {:.4f}, test_accuracy: {:.4f}".
+                  format(train_loss, train_accuracy, test_loss, test_accuracy))
 
-        # Record data by TensorBoard
-        writer.add_scalar("train_loss", train_loss, epoch)
-        writer.add_scalar("train_accuracy", train_accuracy, epoch)
-        writer.add_scalar("test_loss", test_loss, epoch)
-        writer.add_scalar("test_accuracy", test_accuracy, epoch)
-        writer.add_scalar("learning_rate", optimizer.param_groups[0]["lr"], epoch)
+            # Record data by TensorBoard
+            writer.add_scalar("train_loss", train_loss, epoch)
+            writer.add_scalar("train_accuracy", train_accuracy, epoch)
+            writer.add_scalar("test_loss", test_loss, epoch)
+            writer.add_scalar("test_accuracy", test_accuracy, epoch)
+            writer.add_scalar("learning_rate", optimizer.param_groups[0]["lr"], epoch)
+
+        else:
+            # Statistics of data
+            print("=> train_loss: {:.4f}, train_accuracy: {:.4f}".format(train_loss, train_accuracy))
+
+            # Record data by TensorBoard
+            writer.add_scalar("train_loss", train_loss, epoch)
+            writer.add_scalar("train_accuracy", train_accuracy, epoch)
+            writer.add_scalar("learning_rate", optimizer.param_groups[0]["lr"], epoch)
 
         if (epoch + 1) % 50 == 0:
             torch.save(model.state_dict(),
