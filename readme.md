@@ -71,7 +71,7 @@ python train.py --num_classes 10 --model "vit-s" --data "cifar10" --summary_dir 
 |ViT-S|DTN|0.9296|
 |T2T-ViT-S|LN| __0.9314__ |
 |T2T-ViT-S|UN|0.9056|
-|T2T-ViT-S|DTN|Unknown|
+|T2T-ViT-S|DTN|0.9298|
 
 - Dataset: __CIFAR-100__
 - batch-size: 128
@@ -79,12 +79,12 @@ python train.py --num_classes 10 --model "vit-s" --data "cifar10" --summary_dir 
 
 | model | normalization | Top-1 acc |
 | :--: | :--: | :--: |
-|ViT-S|LN|Unknown|
-|ViT-S|UN|Unknown|
-|ViT-S|DTN|Unknown|
-|T2T-ViT-S|LN|Unknown|
-|T2T-ViT-S|UN|Unknown|
-|T2T-ViT-S|DTN|Unknown|
+|ViT-S|LN| __0.7175__ |
+|ViT-S|UN|0.6607|
+|ViT-S|DTN| - |
+|T2T-ViT-S|LN|0.7161|
+|T2T-ViT-S|UN| - |
+|T2T-ViT-S|DTN| - |
 
 ## Update
 
