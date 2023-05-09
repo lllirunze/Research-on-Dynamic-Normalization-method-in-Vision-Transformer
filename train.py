@@ -19,6 +19,7 @@ from torch.utils.tensorboard import SummaryWriter
 from vit import ViT
 from vit_dtn import ViT_DTN
 from vit_un import ViT_UN
+from vit_bn import ViT_BN
 from t2t_vit import T2T_ViT
 from t2t_vit_dtn import T2T_ViT_DTN
 from t2t_vit_un import T2T_ViT_UN
@@ -187,6 +188,15 @@ def train(args):
                     heads=6,
                     mlp_dim=1536,
                     dropout=args.dropout)
+    elif args.model == 'vit-t':
+        model = ViT(image_size=args.image_size,
+                    patch_size=args.patch_size,
+                    num_classes=args.num_classes,
+                    dim=192,
+                    depth=12,
+                    heads=3,
+                    mlp_dim=768,
+                    dropout=args.dropout)
     elif args.model == 'vit-s-dtn':
         model = ViT_DTN(img_size=args.image_size,
                         patch_size=args.patch_size,
@@ -206,6 +216,15 @@ def train(args):
                        mlp_dim=1536,
                        dropout=args.dropout,
                        norm_layer=norm_layer_)
+    elif args.model == 'vit-s-bn':
+        model = ViT_BN(image_size=args.image_size,
+                       patch_size=args.patch_size,
+                       num_classes=args.num_classes,
+                       dim=384,
+                       depth=12,
+                       heads=6,
+                       mlp_dim=1536,
+                       dropout=args.dropout)
     elif args.model == 't2t-vit-s':
         model = T2T_ViT(image_size=args.image_size,
                         patch_size=args.patch_size,
