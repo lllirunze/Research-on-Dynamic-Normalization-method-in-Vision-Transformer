@@ -19,9 +19,11 @@ from torch.utils.tensorboard import SummaryWriter
 from vit import ViT
 from vit_dtn import ViT_DTN
 from vit_un import ViT_UN
+from vit_bn import ViT_BN
 from t2t_vit import T2T_ViT
 from t2t_vit_dtn import T2T_ViT_DTN
 from t2t_vit_un import T2T_ViT_UN
+from t2t_vit_bn import T2T_ViT_BN
 from UN.unified_normalization import UN1d
 from autoaugment import CIFAR10Policy, ImageNetPolicy
 
@@ -162,6 +164,15 @@ def test(args):
                     heads=6,
                     mlp_dim=1536,
                     dropout=args.dropout)
+    elif args.model == 'vit-t':
+        model = ViT(image_size=args.image_size,
+                    patch_size=args.patch_size,
+                    num_classes=args.num_classes,
+                    dim=192,
+                    depth=12,
+                    heads=3,
+                    mlp_dim=768,
+                    dropout=args.dropout)
     elif args.model == 'vit-s-dtn':
         model = ViT_DTN(img_size=args.image_size,
                         patch_size=args.patch_size,
@@ -181,6 +192,15 @@ def test(args):
                        mlp_dim=1536,
                        dropout=args.dropout,
                        norm_layer=norm_layer_)
+    elif args.model == 'vit-s-bn':
+        model = ViT_BN(image_size=args.image_size,
+                       patch_size=args.patch_size,
+                       num_classes=args.num_classes,
+                       dim=384,
+                       depth=12,
+                       heads=6,
+                       mlp_dim=1536,
+                       dropout=args.dropout)
     elif args.model == 't2t-vit-s':
         model = T2T_ViT(image_size=args.image_size,
                         patch_size=args.patch_size,
@@ -191,6 +211,16 @@ def test(args):
                         mlp_dim=1536,
                         dropout=args.dropout,
                         norm_layer=nn.LayerNorm)
+    elif args.model == 't2t-vit-s-bn':
+        model = T2T_ViT_BN(image_size=args.image_size,
+                           patch_size=args.patch_size,
+                           num_classes=args.num_classes,
+                           dim=384,
+                           depth=12,
+                           heads=6,
+                           mlp_dim=1536,
+                           dropout=args.dropout,
+                           norm_layer=nn.LayerNorm)
     elif args.model == 't2t-vit-s-un':
         norm_layer_ = functools.partial(UN1d, window_size=4, warmup_iters=4000, outlier_filtration=True)
         model = T2T_ViT_UN(image_size=args.image_size,
@@ -209,9 +239,11 @@ def test(args):
                             patch_size=args.patch_size,
                             num_classes=args.num_classes,
                             embed_dim=384,
-                            depth=12,
+                            # depth=12,
+                            depth=14,
                             num_heads=6,
-                            mlp_ratio=4.)
+                            mlp_ratio=4.,
+                            drop_rate=0.1)
     else:
         raise Exception("Error: Can't find any model name called {}.".format(args.model))
 
@@ -245,37 +277,56 @@ def test(args):
     # Test model
     model.eval()
     # Define test accuracy and loss
-    top1_accuracy = 0.0
-    top5_accuracy = 0.0
-    test_loss = 0.0
-    with torch.no_grad():
-        for data in test_loader:
-            # Get images and labels
-            images, labels = data
-            images = images.to(device)
-            labels = labels.to(device)
-            # Input the data into model
-            outputs = model(images)
-            # Calculate the loss
-            loss = loss_function(outputs, labels)
-            # Top-1 accuracy
-            prediction = (outputs.argmax(dim=1) == labels).float().mean()
-            # Top-5 accuracy
-            _, rank5 = outputs.topk(5, 1, True, True)
-            rank5 = rank5.t()
-            correct5 = rank5.eq(labels.view(1, -1).expand_as(rank5))
-            correct5 = correct5.contiguous()
-            for k in range(6):
-                correctk = correct5[:k].view(-1).float().sum(0, keepdim=True)
-            # Print statistics
-            test_loss += (loss.item()) / len(test_loader)
-            top1_accuracy += prediction / len(test_loader)
-            top5_accuracy += (correctk.item()) / len(test_loader)
-            # Clear batch variables from memory
-            del images, labels
+    # top1_accuracy = 0.0
+    # top5_accuracy = 0.0
+    # test_loss = 0.0
+    # with torch.no_grad():
+    #     for data in test_loader:
+    #         # Get images and labels
+    #         images, labels = data
+    #         images = images.to(device)
+    #         labels = labels.to(device)
+    #         # Input the data into model
+    #         outputs = model(images)
+    #         # Calculate the loss
+    #         loss = loss_function(outputs, labels)
+    #         # Top-1 accuracy
+    #         prediction = (outputs.argmax(dim=1) == labels).float().mean()
+    #         # Top-5 accuracy
+    #         maxk = max((1, 5))
+    #         _, rank5 = outputs.topk(maxk, 1, True, True)
+    #         rank5 = rank5.t()
+    #         correct5 = rank5.eq(labels.view(1, -1).expand_as(rank5))
+    #         correct5 = correct5.contiguous()
+    #         for k in range(5):
+    #             correctk = correct5[:k].view(-1).float().sum(0, keepdim=True)
+    #         # Print statistics
+    #         test_loss += (loss.item()) / len(test_loader)
+    #         top1_accuracy += prediction / len(test_loader)
+    #         top5_accuracy += (correctk.item()) / len(test_loader)
+    #         # Clear batch variables from memory
+    #         del images, labels
 
             # Statistics of data
-    print("=> test_loss: {:.4f}, top1_accuracy: {:.4f}, top5_accuracy: {:.4f}".format(test_loss, top1_accuracy, top5_accuracy))
+    # print("=> test_loss: {:.4f}, top1_accuracy: {:.4f}, top5_accuracy: {:.4f}".format(test_loss, top1_accuracy, top5_accuracy))
+
+    model.eval()
+    correct = 0
+    # count = 0
+    total = len(test_loader.dataset)
+    for x, y in test_loader:
+        # if count >= 1:
+        #     break
+        x, y = x.to(device), y.to(device)
+        with torch.no_grad():
+            logits = model(x)
+            maxk = max((1, 5))
+            y_resize = y.view(-1, 1)
+            _, pred = logits.topk(maxk, 1, True, True)
+            correct += torch.eq(pred, y_resize).sum().float().item()
+        # count = count + 1
+    # return correct / total
+    print("=> top5_accuracy: {:.4f}".format(correct / total))
 
 
 if __name__ == '__main__':

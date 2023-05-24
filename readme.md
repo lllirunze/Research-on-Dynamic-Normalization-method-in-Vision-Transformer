@@ -4,15 +4,18 @@
 
 ## Abstract
 
-The dynamic feature normalization method of Transformer model is studied from the aspect of model regularization. It is proposed to use feature normalization instead of traditional layer normalization to achieve explicit Token value normalization and accelerate model convergence. Combined with the idea of parameter reorganization, a dynamic learnable feature normalization is proposed to improve the flexibility and computational efficiency of feature normalization.
+This article studies the normalization methods of Vision Transformer and proposes a dynamic learnable normalization method (DTN) to replace the conventional layer normalization, achieving token feature normalization and accelerating the convergence speed of the model. In order to achieve dynamic and learnable effects, this article introduces dynamic learnable normalization parameters, which can enable DTN to use LN and IN simultaneously in the same calculation formula. This parameter can play different roles in network training for different attention heads in DTN, thereby improving the performance of the Vision Transformer and applying it to various tasks in the field of computer vision. DTN can focus on different aspects of the input sequence through multiple attention heads, which can provide the model with different interpretations of the input sequence from different perspectives, thereby facilitating the interpretability of the model and ultimately enabling it to better capture the information of the input sequence.
+
+This article applies the proposed method to different Vision Transformer and conducts image classification experiments with other normalization methods on CIFAR-10 and CIFAR-100 datasets and compares and analyzes the experimental results. Experiments have shown that DTN has better experimental results. Compared with the same type of normalization method, your dynamic normalization method based on the Vision Transformer can better achieve model convergence ability and improve model accuracy.
 
 ---
 
 ## Keywords
 
 - Vision Transformer
-- Learnable Dynamic Feature Normalization
-- Parameter Reorganization
+- Computer Vision
+- Dynamic Token Normalization
+- Attention Mechanism
 
 ---
 
@@ -64,33 +67,41 @@ python train.py --num_classes 10 --model "vit-s" --data "cifar10" --summary_dir 
 - batch-size: 128
 - epochs: 1200
 
-| model | normalization | Top-1 acc |
-| :--: | :--: | :--: |
-|ViT-S|LN|0.9188|
-|ViT-S|BN| - |
-|ViT-S|UN|0.8952|
-|ViT-S|DTN|0.9296|
-|T2T-ViT-S|LN| __0.9314__ |
-|T2T-ViT-S|BN| - |
-|T2T-ViT-S|UN|0.9056|
-|T2T-ViT-S|DTN|0.9298|
+| model | normalization | Top-1 acc | Top-5 acc |
+| :--: | :--: | :--: | :--: |
+|ViT-S|LN|91.88|99.67|
+|ViT-S|BN|91.63|99.72|
+|ViT-S|UN|89.52|99.68|
+|ViT-S|DTN| __92.96__ | __99.85__ |
+|T2T-ViT-S|LN| __93.14__ | __99.89__ |
+|T2T-ViT-S|BN|92.29|99.68|
+|T2T-ViT-S|UN|90.56|99.76|
+|T2T-ViT-S|DTN|92.98| __99.89__ |
 
 - Dataset: __CIFAR-100__
 - batch-size: 128
 - epochs: 1200
 
-| model | normalization | Top-1 acc |
-| :--: | :--: | :--: |
-|ViT-S|LN| __0.7175__ |
-|ViT-S|BN| - |
-|ViT-S|UN|0.6607|
-|ViT-S|DTN|0.6824|
-|T2T-ViT-S|LN|0.7161|
-|T2T-ViT-S|BN| - |
-|T2T-ViT-S|UN| __0.7303__ |
-|T2T-ViT-S|DTN|0.6591|
+| model | normalization | Top-1 acc | Top-5 acc |
+| :--: | :--: | :--: | :--: |
+|ViT-S|LN| __71.75__ | __91.68__ |
+|ViT-S|BN|68.53|89.72|
+|ViT-S|UN|66.07|89.10|
+|ViT-S|DTN|68.24|90.67|
+|T2T-ViT-S|LN|71.61|91.61|
+|T2T-ViT-S|BN|68.96|89.65|
+|T2T-ViT-S|UN|73.03|92.31|
+|T2T-ViT-S|DTN| __75.59__ | __93.63__ |
 
 ## Update
+
+### May 24, 2023:
+
+The thesis has been finished.
+
+### May 23, 2023:
+
+All the experiments have been implemented.
 
 ### April 26, 2023: 
 
@@ -243,9 +254,9 @@ torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 58.00 MiB (GP
 - [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929)
 - [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
 - [Layer Normalization](https://arxiv.org/abs/1607.06450)
+- [Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift](https://arxiv.org/abs/1502.03167)
+- [Instance Normalization: The Missing Ingredient for Fast Stylization](https://arxiv.org/abs/1607.08022)
 - [On Layer Normalization in the Transformer Architecture](https://arxiv.org/abs/2002.04745)
-- [RepVGG: Making VGG-style ConvNets Great Again](https://arxiv.org/abs/2101.03697)
-- [Feature normalization and likelihood-based similarity measures for image retrieval](http://www.cs.bilkent.edu.tr/~saksoy/papers/prletters01_likelihood.pdf)
 - [Unified Normalization for Accelerating and Stabilizing Transformers](https://arxiv.org/abs/2208.01313)
 - [Dynamic Token Normalization Improves Vision Transformers](https://arxiv.org/abs/2112.02624)
-- [RepMLPNet: Hierarchical Vision MLP with Re-parameterized Locality](https://openaccess.thecvf.com/content/CVPR2022/html/Ding_RepMLPNet_Hierarchical_Vision_MLP_With_Re-Parameterized_Locality_CVPR_2022_paper.html)
+- [AutoAugment: Learning Augmentation Policies from Data](https://arxiv.org/abs/1805.09501)

@@ -240,7 +240,7 @@ class T2T_ViT_DTN(nn.Module):
     """
 
     def __init__(self, img_size=224, patch_size=16, tokens_type='transformer', pool='cls',
-                 in_chans=3, num_classes=1000, embed_dim=384, depth=12,
+                 in_chans=3, num_classes=100, embed_dim=384, depth=12,
                  num_heads=6, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop_rate=0., attn_drop_rate=0.,
                  drop_path_rate=0., norm_type='layer', norm_layer=nn.LayerNorm,
                  local_up_to_layer=10, use_pos_embed=True):

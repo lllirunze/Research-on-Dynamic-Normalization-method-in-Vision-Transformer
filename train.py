@@ -23,6 +23,7 @@ from vit_bn import ViT_BN
 from t2t_vit import T2T_ViT
 from t2t_vit_dtn import T2T_ViT_DTN
 from t2t_vit_un import T2T_ViT_UN
+from t2t_vit_bn import T2T_ViT_BN
 from UN.unified_normalization import UN1d
 from autoaugment import CIFAR10Policy, ImageNetPolicy
 
@@ -235,6 +236,16 @@ def train(args):
                         mlp_dim=1536,
                         dropout=args.dropout,
                         norm_layer=nn.LayerNorm)
+    elif args.model == 't2t-vit-s-bn':
+        model = T2T_ViT_BN(image_size=args.image_size,
+                           patch_size=args.patch_size,
+                           num_classes=args.num_classes,
+                           dim=384,
+                           depth=12,
+                           heads=6,
+                           mlp_dim=1536,
+                           dropout=args.dropout,
+                           norm_layer=nn.LayerNorm)
     elif args.model == 't2t-vit-s-un':
         norm_layer_ = functools.partial(UN1d, window_size=4, warmup_iters=4000, outlier_filtration=True)
         model = T2T_ViT_UN(image_size=args.image_size,
@@ -253,9 +264,11 @@ def train(args):
                             patch_size=args.patch_size,
                             num_classes=args.num_classes,
                             embed_dim=384,
-                            depth=12,
+                            # depth=12,
+                            depth=14,
                             num_heads=6,
-                            mlp_ratio=4.)
+                            mlp_ratio=4.,
+                            drop_rate=0.1)
     else:
         raise Exception("Error: Can't find any model name called {}.".format(args.model))
 

@@ -380,6 +380,7 @@ class ViT_DTN(nn.Module):
         x = self.pos_drop(x)
 
         for u, blk in enumerate(self.blocks):
+            print("Layer: " + str(u))
             if u == self.local_up_to_layer:
                 x = torch.cat((cls_tokens, x), dim=1)
             x = blk(x)

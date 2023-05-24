@@ -82,7 +82,7 @@ class DTN(nn.Module):
 
         # statistics of position-aware IN
         H, W = self.resolution
-        # TODO: T 是 H*W+1
+        # TODO: T 是 H*W
         assert T == H * W, "input feature {} has wrong size {}".format(input.shape, self.resolution)
         # input_.shape: [B, C, H, W]
         input_ = input.view(B, H, W, C).permute(0, 3, 1, 2).contiguous()
@@ -120,10 +120,22 @@ class DTN(nn.Module):
 
         # statistics of DTN
         if not self.only_var:
+
+            # TODO: 输出参数
+            # print("mean Lambda h: ")
+            #
+            # print(mean_norm_weight.view(self.num_heads))
+
             mean_rppn = (1. - mean_norm_weight.view(1, self.num_heads, 1, 1)) * mean_rppn
+            # mean_norm_weight 是 参数 lambda^{h}
             mean_rppn += mean_norm_weight.view(1, self.num_heads, 1, 1) * mean_ln.view(B, 1, 1, -1)
             # [B, T, C]
             mean_rppn = mean_rppn.view(B, C, T).permute(0, 2, 1)
+
+        # TODO: 输出参数
+        # print("var Lambda h: ")
+        #
+        # print(var_norm_weight.view(self.num_heads))
 
         var_rppn = (1. - var_norm_weight.view(1, self.num_heads, 1, 1)) * var_rppn
         var_rppn += var_norm_weight.view(1, self.num_heads, 1, 1) * var_ln.view(B, 1, 1, -1)
@@ -163,8 +175,6 @@ class DTN(nn.Module):
         device = self.weight.device
         self.rel_indices = rel_indices.to(device)
 
-
-'''
 if __name__ == '__main__':
     DTN = DTN(num_features=384, group_num=6, resolution=(56, 56))
     # print(DTN.named_parameters())
@@ -172,4 +182,3 @@ if __name__ == '__main__':
     y = DTN(x)
     print(y.size())
 
-'''
